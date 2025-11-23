@@ -26,6 +26,7 @@ export default function DashboardAnalyze({ mode, toggleMode }) {
   const [loading, setLoading] = useState(false);
   const [history, setHistory] = useState([]);
   const [error, setError] = useState(null);
+  const [downloading, setDownloading] = useState(false);
 
   const loadSummary = async () => {
     try {
@@ -50,13 +51,10 @@ export default function DashboardAnalyze({ mode, toggleMode }) {
     loadHistory();
   }, []);
 
-  
-
   const upload = async () => {
     setError(null);
 
     if (!file) return setError("Please choose a CSV file first.");
-
     if (!file.name.toLowerCase().endsWith(".csv"))
       return setError("Invalid file type — only CSV files allowed.");
 
@@ -85,7 +83,33 @@ export default function DashboardAnalyze({ mode, toggleMode }) {
     if (input) input.value = "";
   };
 
-  
+  // 🔥 DOWNLOAD PDF (Latest dataset)
+  const downloadPDF = async () => {
+    if (!history.length) return alert("No datasets available!");
+
+    const latestId = history[0].id;
+
+    setDownloading(true);
+    try {
+      const res = await api.get(`/generate_pdf/${latestId}/`, {
+        responseType: "blob",
+      });
+
+      const blob = new Blob([res.data], { type: "application/pdf" });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+
+      a.href = url;
+      a.download = "report.pdf";
+      a.click();
+
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      alert("PDF download failed");
+    } finally {
+      setDownloading(false);
+    }
+  };
 
   const StatCard = ({ title, value }) => (
     <Paper
@@ -97,10 +121,7 @@ export default function DashboardAnalyze({ mode, toggleMode }) {
         borderRadius: 3,
       }}
     >
-      <Typography
-        variant="subtitle2"
-        sx={{ color: "text.secondary", fontWeight: 600 }}
-      >
+      <Typography variant="subtitle2" sx={{ color: "text.secondary", fontWeight: 600 }}>
         {title}
       </Typography>
 
@@ -117,23 +138,37 @@ export default function DashboardAnalyze({ mode, toggleMode }) {
     </Paper>
   );
 
-  
-
   return (
     <Box sx={{ minHeight: "100vh", bgcolor: mode === "light" ? "#f6f6f7" : "#0b0b0b" }}>
+      {/* TOP BAR */}
       <TopBar
         onMenuToggle={() => setSidebarOpen(true)}
         mode={mode}
         toggleMode={toggleMode}
       />
 
-      <CollapsibleSidebar
-        open={sidebarOpen}
-        onClose={() => setSidebarOpen(false)}
-      />
+      <CollapsibleSidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
       <Box sx={{ p: 3, maxWidth: 1200, mx: "auto" }}>
-        
+        {/* 🟡 DOWNLOAD BUTTON — RESTORED HERE */}
+        <Box display="flex" justifyContent="end" mb={2}>
+          <Button
+            variant="contained"
+            sx={{
+              background: "#ffb300",
+              color: "black",
+              fontWeight: 700,
+              px: 3,
+              py: 1.2,
+              borderRadius: 2,
+            }}
+            onClick={downloadPDF}
+            disabled={downloading || !history.length}
+          >
+            {downloading ? <CircularProgress size={20} color="inherit" /> : "Download PDF (Latest)"}
+          </Button>
+        </Box>
+
         {/* ERROR */}
         {error && (
           <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError(null)}>
@@ -142,7 +177,6 @@ export default function DashboardAnalyze({ mode, toggleMode }) {
         )}
 
         {/* UPLOAD BOX */}
-
         <Paper
           id="upload"
           sx={{
@@ -165,12 +199,8 @@ export default function DashboardAnalyze({ mode, toggleMode }) {
               flexWrap: "wrap",
             }}
           >
-
-            {/* Choose File Button */}
-            <label
-              htmlFor="upload-input"
-              style={{ cursor: "pointer" }}
-            >
+            {/* Choose file */}
+            <label htmlFor="upload-input" style={{ cursor: "pointer" }}>
               <Box
                 sx={{
                   px: 3,
@@ -215,11 +245,7 @@ export default function DashboardAnalyze({ mode, toggleMode }) {
                 borderRadius: 2,
               }}
             >
-              {loading ? (
-                <CircularProgress size={18} color="inherit" />
-              ) : (
-                "UPLOAD & ANALYZE"
-              )}
+              {loading ? <CircularProgress size={18} color="inherit" /> : "UPLOAD & ANALYZE"}
             </Button>
 
             <Button
@@ -238,8 +264,7 @@ export default function DashboardAnalyze({ mode, toggleMode }) {
           </Box>
         </Paper>
 
-        {/*STAT*/}
-
+        {/* STATS */}
         <Paper
           id="stats"
           sx={{
@@ -261,26 +286,20 @@ export default function DashboardAnalyze({ mode, toggleMode }) {
             <>
               <Grid container spacing={3} justifyContent="center">
                 <Grid item xs={12} sm={3}>
-                  <StatCard
-                    title="Total Equipment"
-                    value={summary.total_equipment}
-                  />
+                  <StatCard title="Total Equipment" value={summary.total_equipment} />
                 </Grid>
-
                 <Grid item xs={12} sm={3}>
                   <StatCard
                     title="Avg Flowrate"
                     value={Number(summary.avg_flowrate).toFixed(2)}
                   />
                 </Grid>
-
                 <Grid item xs={12} sm={3}>
                   <StatCard
                     title="Avg Pressure"
                     value={Number(summary.avg_pressure).toFixed(2)}
                   />
                 </Grid>
-
                 <Grid item xs={12} sm={3}>
                   <StatCard
                     title="Avg Temperature"
@@ -289,7 +308,6 @@ export default function DashboardAnalyze({ mode, toggleMode }) {
                 </Grid>
               </Grid>
 
-              {/* Pie Chart */}
               <Box mt={4} display="flex" justifyContent="center">
                 <Paper sx={{ p: 2, width: 700 }}>
                   <Typography variant="h6" textAlign="center" mb={2}>
@@ -302,22 +320,19 @@ export default function DashboardAnalyze({ mode, toggleMode }) {
           )}
         </Paper>
 
-        {/* CORRELATION HEATMAP  */}
-
+        {/* CORRELATION HEATMAP */}
         {summary?.correlation && (
           <Paper sx={{ p: 4, mt: 4, borderRadius: 4 }}>
             <Typography variant="h6" textAlign="center" mb={2}>
               Correlation Heatmap
             </Typography>
-
             <Box display="flex" justifyContent="center">
               <CorrelationHeatmap data={summary.correlation} mode={mode} />
             </Box>
           </Paper>
         )}
 
-        {/*OUTLIERS  */}
-
+        {/* OUTLIERS */}
         {summary?.outliers && (
           <Paper sx={{ p: 4, mt: 4, borderRadius: 4 }}>
             <Typography variant="h6" textAlign="center" mb={2}>
@@ -341,8 +356,7 @@ export default function DashboardAnalyze({ mode, toggleMode }) {
           </Paper>
         )}
 
-        {/*AVERAGES */}
-
+        {/* TYPEWISE AVERAGES */}
         {summary?.typewise_averages && (
           <Paper sx={{ p: 4, mt: 4, borderRadius: 4 }}>
             <Typography variant="h6" textAlign="center" mb={2}>
@@ -355,9 +369,7 @@ export default function DashboardAnalyze({ mode, toggleMode }) {
                   <th style={{ padding: 8, textAlign: "left" }}>Type</th>
                   <th style={{ padding: 8, textAlign: "left" }}>Avg Flowrate</th>
                   <th style={{ padding: 8, textAlign: "left" }}>Avg Pressure</th>
-                  <th style={{ padding: 8, textAlign: "left" }}>
-                    Avg Temperature
-                  </th>
+                  <th style={{ padding: 8, textAlign: "left" }}>Avg Temperature</th>
                 </tr>
               </thead>
 
