@@ -15,7 +15,6 @@ def analyze_equipment_csv(path_or_buffer):
         missing = REQUIRED_COLUMNS - set(df.columns)
         raise ValueError(f"Missing required columns: {', '.join(missing)}")
 
-    # convert numeric columns
     for col in ['Flowrate', 'Pressure', 'Temperature']:
         df[col] = pd.to_numeric(df[col], errors='coerce')
 
