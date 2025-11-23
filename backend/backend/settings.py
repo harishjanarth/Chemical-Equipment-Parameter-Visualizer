@@ -166,3 +166,11 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [],
     'DEFAULT_PERMISSION_CLASSES': [],
 }
+
+CORS_ALLOWED_ORIGINS = [
+    "https://chemical-equipment-parameter-visualizer-lzro.onrender.com"
+]
+
+CSRF_TRUSTED_ORIGINS = [
+    "https://chemical-equipment-parameter-visualizer-lzro.onrender.com"
+]
