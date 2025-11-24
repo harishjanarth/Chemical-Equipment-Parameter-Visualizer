@@ -1,7 +1,3 @@
-// ------------------------------
-// FIXED App.jsx (clean + stable)
-// ------------------------------
-
 import React, { useMemo, useState } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
