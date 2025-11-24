@@ -50,6 +50,7 @@ Screenshots:
 ![Correlation](screenshot/correlation.png)
 ![Outlier Detection](screenshot/outlier_detection.png)
 ![Type wise average](screenshot/outliers.png)
+![History](screenshot/history.png)
 
 
 -> PyQt5:
