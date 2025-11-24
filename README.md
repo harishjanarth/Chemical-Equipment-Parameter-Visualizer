@@ -1,11 +1,12 @@
 # Chemical-Equipment-Parameter-Visualizer
 
 
-This project is a hybrid application consisting of three components:
+This project is a hybrid application consisting of these components:
 
       Django backend (REST API and data processing)
-      React frontend (web interface for uploading and visualizing chemical equipment data)
-      PyQt desktop application (offline data visualization)
+      React frontend 
+      PyQt5 desktop application 
+      MaterialUI, SQLite, ChartJS
 
 The system allows users to upload CSV files containing equipment parameters such as flowrate, pressure, temperature, and type. The application processes the dataset and provides graphical and tabular visualizations.
 
