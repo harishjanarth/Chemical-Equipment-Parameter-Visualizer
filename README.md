@@ -38,3 +38,16 @@ Desktop PyQt5 setup:
             source venv/bin/activate  (Linux/macOS)
 3)Install dependencies: pip install -r requirements.txt
 4) Run the application: python main.py
+
+
+Screenshots:
+-> React:
+![Upload File](screenshot/upload.png)
+![Statistics](screenshot/statistics.png)
+![Correlation](screenshot/correlation.png)
+![Outlier Detection](screenshot/outlier_detection.png)
+![Type wise average](screenshot/outliers.png)
+
+-> PyQt5:
+![](screenshot/pyqt-1.png)
+![](screenshot/pyqt-2.png)
